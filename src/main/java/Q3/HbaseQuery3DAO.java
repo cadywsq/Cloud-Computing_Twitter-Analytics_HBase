@@ -8,16 +8,14 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.MultiRowRangeFilter;
-import org.apache.hadoop.hbase.filter.MultiRowRangeFilter.RowRange;
+import org.apache.hadoop.hbase.filter.CompareFilter;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class HbaseQuery3DAO {
@@ -56,7 +54,7 @@ public class HbaseQuery3DAO {
         // Remember to set correct log level to avoid unnecessary output.
         logger.setLevel(logLevel);
         conf = HBaseConfiguration.create();
-         conf.set("hbase.master", zkAddr + ":60000");
+        conf.set("hbase.master", zkAddr + ":60000");
 //        conf.set("hbase.master", "*" + zkAddr + ":9000*");
         conf.set("hbase.zookeeper.quorum", zkAddr);
         conf.set("hbase.zookeeper.property.clientport", "2181");
@@ -84,15 +82,25 @@ public class HbaseQuery3DAO {
             int dateParameter1 = Integer.valueOf(date1);
             int dateParameter2 = Integer.valueOf(date2);
 
-            List<RowRange> ranges = new ArrayList<RowRange>();
+            FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+
             for (int date = dateParameter1; date <= dateParameter2; date++) {
                 String start = String.valueOf(date) + "," + id1;
                 String end = String.valueOf(date) + "," + id2;
-                ranges.add(new RowRange(Bytes.toBytes(start), true, Bytes.toBytes(end), true));
+                SingleColumnValueFilter lowerFilter = new SingleColumnValueFilter(bColFamily, dCol, CompareFilter
+                        .CompareOp.GREATER_OR_EQUAL, Bytes.toBytes(start));
+                SingleColumnValueFilter upperFilter = new SingleColumnValueFilter(bColFamily, dCol, CompareFilter
+                        .CompareOp.LESS_OR_EQUAL, Bytes.toBytes(end));
+                FilterList subFilterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
+
+                subFilterList.addFilter(lowerFilter);
+                subFilterList.addFilter(upperFilter);
+                filterList.addFilter(subFilterList);
             }
 
-            Filter filter = new MultiRowRangeFilter(ranges);
-            scan.setFilter(filter);
+            scan.setFilter(filterList);
+            scan.setBatch(20);
+
             System.out.println("Filter set for scan.");
             rs = table.getScanner(scan);
             System.out.println("Result scanner got.");
