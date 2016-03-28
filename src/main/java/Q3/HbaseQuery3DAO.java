@@ -56,7 +56,7 @@ public class HbaseQuery3DAO {
         // Remember to set correct log level to avoid unnecessary output.
         logger.setLevel(logLevel);
         conf = HBaseConfiguration.create();
-         conf.set("hbase.master", zkAddr + ":60000");
+        conf.set("hbase.master", zkAddr + ":60000");
 //        conf.set("hbase.master", "*" + zkAddr + ":9000*");
         conf.set("hbase.zookeeper.quorum", zkAddr);
         conf.set("hbase.zookeeper.property.clientport", "2181");
@@ -67,8 +67,7 @@ public class HbaseQuery3DAO {
         conn = HConnectionManager.createConnection(conf);
     }
 
-    public String findWordCount(String id1, String id2, String date1, String date2, String w1, String w2, String w3)
-            throws
+    public String findWordCount(String id1, String id2, String date1, String date2, String w1, String w2, String w3)throws
             Exception {
         HTableInterface table = null;
         ResultScanner rs = null;
@@ -84,7 +83,7 @@ public class HbaseQuery3DAO {
             int dateParameter1 = Integer.valueOf(date1);
             int dateParameter2 = Integer.valueOf(date2);
 
-            List<RowRange> ranges = new ArrayList<RowRange>();
+            List<RowRange> ranges = new ArrayList<>();
             for (int date = dateParameter1; date <= dateParameter2; date++) {
                 String start = String.valueOf(date) + "," + id1;
                 String end = String.valueOf(date) + "," + id2;
