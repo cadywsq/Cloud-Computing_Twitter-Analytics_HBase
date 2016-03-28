@@ -1,5 +1,11 @@
 package TeamProjHBase.TeamProjHBase;
 
+import static io.undertow.servlet.Servlets.defaultContainer;
+import static io.undertow.servlet.Servlets.deployment;
+import static io.undertow.servlet.Servlets.servlet;
+
+import javax.servlet.ServletException;
+
 import Q1.Q1Servlet;
 import Q2.Q2Servlet;
 import Q3.Q3Servlet;
@@ -9,12 +15,6 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-
-import javax.servlet.ServletException;
-
-import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.deployment;
-import static io.undertow.servlet.Servlets.servlet;
 
 public class Main {
     public Main() throws Exception{
