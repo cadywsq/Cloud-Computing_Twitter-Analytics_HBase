@@ -84,19 +84,25 @@ public class HbaseQuery3DAO {
 
             FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
 
+
             for (int date = dateParameter1; date <= dateParameter2; date++) {
                 String start = String.valueOf(date) + "," + id1;
                 String end = String.valueOf(date) + "," + id2;
+
+                scan.setStartRow(Bytes.toBytes(date + "," + id1));
+                scan.setStartRow(Bytes.toBytes(date + "," + id2));
+
                 SingleColumnValueFilter lowerFilter = new SingleColumnValueFilter(bColFamily, dCol, CompareFilter
                         .CompareOp.GREATER_OR_EQUAL, Bytes.toBytes(start));
                 SingleColumnValueFilter upperFilter = new SingleColumnValueFilter(bColFamily, dCol, CompareFilter
                         .CompareOp.LESS_OR_EQUAL, Bytes.toBytes(end));
-                FilterList subFilterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
 
+                FilterList subFilterList = new FilterList(FilterList.Operator.MUST_PASS_ALL);
                 subFilterList.addFilter(lowerFilter);
                 subFilterList.addFilter(upperFilter);
                 filterList.addFilter(subFilterList);
             }
+
 
             scan.setFilter(filterList);
             scan.setBatch(20);
@@ -105,9 +111,9 @@ public class HbaseQuery3DAO {
             rs = table.getScanner(scan);
             System.out.println("Result scanner got.");
 
-            Result next;
-            while ((next = rs.next()) != null) {
-                String[] wordcount = new String(next.value()).split(",");
+            for (Result result = rs.next(); result != null; result = rs.next()) {
+                String[] wordcount = new String(result.value()).split(",");
+                System.out.println(wordcount[0]);
                 for (String kv : wordcount) {
                     String[] entry = kv.split(":");
                     if (entry[0].equals(w1)) {
