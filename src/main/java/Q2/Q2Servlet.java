@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Q2Servlet extends HttpServlet{
+public class Q2Servlet extends HttpServlet {
     private static final String TEAM_ID = "SilverLining";
     private static final String TEAM_AWS_ACCOUNT = "6408-5853-5216";
     private static final Cache cacheMap = new Cache();
@@ -19,7 +19,12 @@ public class Q2Servlet extends HttpServlet{
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String key = request.getParameter("userid");
         String message = request.getParameter("hashtag");
+        System.out.println("UserId: " + key + "\t" + "hashtag: " + message);
+
+        response.setContentType("text/plain;charset=UTF-8");
         PrintWriter writer = response.getWriter();
+
+//        new HbaseQuery2DAO();
 
         if (key == null || message == null) {
             writer.write(formatOutput());
@@ -32,7 +37,7 @@ public class Q2Servlet extends HttpServlet{
             result = formatOutput(key, message);
             cacheMap.put(mapKey, result);
         }
-        writer.write(formatOutput());
+        writer.write(result);
         writer.close();
     }
 
