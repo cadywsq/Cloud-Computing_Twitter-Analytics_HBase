@@ -1,7 +1,6 @@
 package Q2;
 
-import java.io.IOException;
-
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
@@ -13,7 +12,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Charsets;
+import java.io.IOException;
 
 /**
  * @author Siqi Wang siqiw1 on 3/10/16.
@@ -23,8 +22,8 @@ public class HbaseQuery2DAO {
      * The private IP address of HBase master node.
      */
     //TODO: change to master node private IP.
-    static String zkAddr = "172.31.1.63";
-    static Level logLevel = Level.INFO;
+    static String zkAddr = "172.31.13.193";
+    static Level logLevel = Level.WARN;
 
     /**
      * HBase connection.
@@ -53,15 +52,17 @@ public class HbaseQuery2DAO {
         // Remember to set correct log level to avoid unnecessary output.
         logger.setLevel(logLevel);
         conf = HBaseConfiguration.create();
-//        conf.set("hbase.master", zkAddr + ":60000");
-        conf.set("hbase.master", "*" + zkAddr + ":9000*");
+        conf.set("hbase.master", zkAddr + ":60000");
+//        conf.set("hbase.master", "*" + zkAddr + ":9000*");
         conf.set("hbase.zookeeper.quorum", zkAddr);
         conf.set("hbase.zookeeper.property.clientport", "2181");
         if (!zkAddr.matches("\\d+.\\d+.\\d+.\\d+")) {
             System.out.print("HBase not configured!");
             return;
         }
-        conn = HConnectionManager.createConnection(conf);
+        if (conn == null) {
+            conn = HConnectionManager.createConnection(conf);
+        }
     }
 
     static String findMatchedTweets(String userId, String hashtag) throws Exception {
@@ -86,7 +87,7 @@ public class HbaseQuery2DAO {
         String get(String userId, String hashtag) throws IOException {
             String queryParam = userId + "," + hashtag;
             Get get = new Get(Bytes.toBytes(queryParam));
-            get.addColumn(bColFamily, Bytes.toBytes("useridhashtag"));
+            get.addColumn(bColFamily, Bytes.toBytes("idht"));
             get.addColumn(bColFamily, Bytes.toBytes("output"));
 
             Result result = tweetTable.get(get);

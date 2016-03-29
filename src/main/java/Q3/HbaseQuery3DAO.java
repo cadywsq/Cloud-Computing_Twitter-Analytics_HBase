@@ -42,7 +42,9 @@ public class HbaseQuery3DAO {
     private static Configuration conf;
 
     public HbaseQuery3DAO() throws IOException {
-        initializeConnection();
+        if (conn == null) {
+            initializeConnection();
+        }
     }
 
     /**

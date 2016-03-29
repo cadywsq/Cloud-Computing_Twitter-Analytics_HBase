@@ -1,6 +1,7 @@
 package TeamProjHBase.TeamProjHBase;
 
 import Q1.Q1Servlet;
+import Q2.HbaseQuery2DAO;
 import Q2.Q2Servlet;
 import Q3.Q3Servlet;
 import io.undertow.Handlers;
@@ -23,6 +24,7 @@ public class Main {
     public static final String PATH = "/";
     public static void main(String[] args) throws Exception{
         try {
+            new HbaseQuery2DAO();
             DeploymentInfo servletBuilder = deployment()
                     .setClassLoader(Main.class.getClassLoader())
                     .setContextPath(PATH)
