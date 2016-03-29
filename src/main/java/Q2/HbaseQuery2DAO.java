@@ -22,7 +22,7 @@ public class HbaseQuery2DAO {
      * The private IP address of HBase master node.
      */
     //TODO: change to master node private IP.
-    static String zkAddr = "172.31.13.193";
+    static String zkAddr = "172.31.48.217";
     static Level logLevel = Level.WARN;
 
     /**

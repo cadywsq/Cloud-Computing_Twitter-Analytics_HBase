@@ -22,35 +22,29 @@ public class Q3Servlet extends HttpServlet {
         String w2 = words[1];
         String w3 = words[2];
 
-        System.out.println(String.format("id1: %s\tid2: %s\tdate1: %s\tdate2: %s\twords: %s", id1, id2, date1, date2, words));
+        System.out.println(String.format("id1: %s\tid2: %s\tdate1: %s\tdate2: %s", id1, id2, date1, date2));
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(TEAM_ID + "," + TEAM_AWS_ACCOUNT + "\n");
-
-        HbaseQuery3DAO dao = new HbaseQuery3DAO();
         String result = null;
+        String dateParameter1 = date1.replace("-", "");
+        String dateParameter2 = date2.replace("-", "");
         try {
-            String dateParameter1 = date1.replace("-", "");
-            String dateParameter2 = date1.replace("-", "");
-            result = dao.findWordCount(id1, id2, dateParameter1, dateParameter2, w1, w2, w3);
-        } catch (NumberFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            result = HbaseQuery3DAO.getWordCounts(id1, id2, dateParameter1, dateParameter2, w1, w2, w3);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        builder.append(result);
         PrintWriter writer = resp.getWriter();
-        writer.write(builder.toString());
+        writer.write(formatOutput(result));
         writer.close();
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO Auto-generated method stub
         doGet(req, resp);
+    }
+
+    static String formatOutput(String wordCount) {
+        String header = TEAM_ID + "," + TEAM_AWS_ACCOUNT + "\n";
+        return header + wordCount;
     }
 
 }
