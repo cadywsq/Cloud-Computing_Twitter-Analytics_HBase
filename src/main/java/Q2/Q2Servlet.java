@@ -59,7 +59,7 @@ public class Q2Servlet extends HttpServlet {
             return header + "\n";
         }
         matchedTweets = matchedTweets.replace("\\n", "\n").replace("\\t", "\t").replace("\\\"", "\"");
-        return header + matchedTweets + "\n";
+        return header + matchedTweets + "\n\n";
     }
 
     static String formatOutput() {

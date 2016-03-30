@@ -2,12 +2,13 @@ package Q3;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HConnection;
-import org.apache.hadoop.hbase.client.HConnectionManager;
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -16,25 +17,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-//@SuppressWarnings("deprecation")
 public class HbaseQuery3DAO {
 
     // TODO: change to master node private IP.
-    static String zkAddr = "172.31.48.217";
-    static Level logLevel = Level.WARN;
-    /**
-     * HBase connection.
-     */
-    static HConnection conn;
-    /**
-     * Byte representation of column family.
-     */
+    private static String zkAddr = "127.0.0.1";
+    private static Level logLevel = Level.WARN;
+
+    private static Connection conn;
+    private static TableName hbaseTable = TableName.valueOf("tweets3");
+
     private final static byte[] bColFamily = Bytes.toBytes("data");
     private final static byte[] rowKeyCol = Bytes.toBytes("id");
     private final static byte[] bCol = Bytes.toBytes("output");
-    /**
-     * Logger.
-     */
+
     private final static Logger logger = Logger.getRootLogger();
     private static Configuration conf;
 
@@ -47,8 +42,7 @@ public class HbaseQuery3DAO {
      *
      * @throws IOException
      */
-    static void initializeConnection() throws IOException {
-        // Remember to set correct log level to avoid unnecessary output.
+    private static void initializeConnection() throws IOException {
         logger.setLevel(logLevel);
         conf = HBaseConfiguration.create();
         conf.set("hbase.master", zkAddr + ":60000");
@@ -59,7 +53,7 @@ public class HbaseQuery3DAO {
             System.out.print("HBase not configured!");
             return;
         }
-        conn = HConnectionManager.createConnection(conf);
+        conn = ConnectionFactory.createConnection(conf);
     }
 
     static String getWordCounts(String userId1, String userId2, String date1, String date2, String word1, String
@@ -71,20 +65,20 @@ public class HbaseQuery3DAO {
     }
 
 
-    static class TweetsTable implements AutoCloseable {
-        private final HTableInterface tweetTable;
+    private static class TweetsTable implements AutoCloseable {
+        private final Table tweetTable;
 
-        TweetsTable(HTableInterface tweetTable) {
+        TweetsTable(Table tweetTable) {
             this.tweetTable = tweetTable;
         }
 
-        static TweetsTable getTweetTable() throws IOException {
-            HTableInterface table = conn.getTable("tweets3");
+        private static TweetsTable getTweetTable() throws IOException {
+            Table table = conn.getTable(hbaseTable);
             return new TweetsTable(table);
         }
 
-        String getWordCountOutput(String userId1, String userId2, String date1, String date2, String word1, String word2,
-                                  String word3) throws IOException {
+        private String getWordCountOutput(String userId1, String userId2, String date1, String date2, String word1, String
+                word2, String word3) throws IOException {
             String wordCounts = getDateValidLines(userId1, userId2, date1, date2);
 
             int count1, count2, count3;
@@ -99,7 +93,7 @@ public class HbaseQuery3DAO {
             return String.format("%s:%s\n%s:%s\n%s:%s\n", word1, count1, word2, count2, word3, count3);
         }
 
-        ArrayList<String> readData(String userId1, String userId2) throws IOException {
+        private ArrayList<String> readData(String userId1, String userId2) throws IOException {
             ArrayList<String> dataList = new ArrayList<>();
             userId1 = String.format("%010d", Long.parseLong(userId1));
             userId2 = String.format("%010d", Long.parseLong(userId2) + 1);
@@ -119,7 +113,7 @@ public class HbaseQuery3DAO {
             return dataList;
         }
 
-        String getDateValidLines(String userId1, String userId2, String date1, String date2) throws IOException {
+        private String getDateValidLines(String userId1, String userId2, String date1, String date2) throws IOException {
             ArrayList<String> dataLines = readData(userId1, userId2);
             StringBuilder builder = new StringBuilder();
 
@@ -139,7 +133,7 @@ public class HbaseQuery3DAO {
         }
 
 
-        HashMap<String, Integer> getWordCountMap(String[] wordCountList, String word1, String word2, String word3) {
+        private HashMap<String, Integer> getWordCountMap(String[] wordCountList, String word1, String word2, String word3) {
             HashMap<String, Integer> wordCountMap = new HashMap<>();
             wordCountMap.put(word1, 0);
             wordCountMap.put(word2, 0);
