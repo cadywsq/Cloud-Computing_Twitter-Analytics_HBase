@@ -19,10 +19,7 @@ import java.io.IOException;
  * @author Siqi Wang siqiw1 on 3/10/16.
  */
 public class HbaseQuery2DAO {
-    /**
-     * The private IP address of HBase master node.
-     */
-    //TODO: change to master node private IP.
+
     private static String zkAddr = "127.0.0.1";
     private static Level logLevel = Level.WARN;
 
@@ -44,7 +41,6 @@ public class HbaseQuery2DAO {
      * @throws IOException
      */
     private static void initializeConnection() throws IOException {
-        // Remember to set correct log level to avoid unnecessary output.
         logger.setLevel(logLevel);
         conf = HBaseConfiguration.create();
         conf.set("hbase.master", zkAddr + ":60000");
@@ -77,8 +73,9 @@ public class HbaseQuery2DAO {
             return new TweetsTable(table);
         }
 
+        // Get the cell of matched tweets from HBase.
         private String get(String userId, String hashtag) throws IOException {
-            String queryParam = userId + "#" + hashtag;
+            String queryParam = userId + "," + hashtag;
             Get get = new Get(Bytes.toBytes(queryParam));
             get.addColumn(bColFamily, Bytes.toBytes("idht"));
             get.addColumn(bColFamily, Bytes.toBytes("output"));
@@ -87,7 +84,6 @@ public class HbaseQuery2DAO {
             if (result == null || result.isEmpty()) {
                 return "";
             }
-//            byte[] value = result.getValue(Bytes.toBytes("useridhashtag"), Bytes.toBytes("output"));
             byte[] value = result.value();
             String matchedTweets = new String(value, Charsets.UTF_8);
             return matchedTweets;

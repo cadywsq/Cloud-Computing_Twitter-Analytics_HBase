@@ -19,7 +19,6 @@ import java.util.HashMap;
 
 public class HbaseQuery3DAO {
 
-    // TODO: change to master node private IP.
     private static String zkAddr = "127.0.0.1";
     private static Level logLevel = Level.WARN;
 
@@ -77,6 +76,7 @@ public class HbaseQuery3DAO {
             return new TweetsTable(table);
         }
 
+        // Return the 3 words and their counts in required output format.
         private String getWordCountOutput(String userId1, String userId2, String date1, String date2, String word1, String
                 word2, String word3) throws IOException {
             String wordCounts = getDateValidLines(userId1, userId2, date1, date2);
@@ -89,10 +89,10 @@ public class HbaseQuery3DAO {
             count2 = wordCountMap.get(word2);
             count3 = wordCountMap.get(word3);
 
-//            System.out.println(String.format("count1:%d\tcount2:%d\tcount3:%d", count1, count2, count3));
             return String.format("%s:%s\n%s:%s\n%s:%s\n", word1, count1, word2, count2, word3, count3);
         }
 
+        // Return all cells within the required userID range.
         private ArrayList<String> readData(String userId1, String userId2) throws IOException {
             ArrayList<String> dataList = new ArrayList<>();
             userId1 = String.format("%010d", Long.parseLong(userId1));
@@ -107,12 +107,12 @@ public class HbaseQuery3DAO {
 
             ResultScanner resultScanner = tweetTable.getScanner(scan);
             for (Result result = resultScanner.next(); result != null; result = resultScanner.next()) {
-//                System.out.println("rowkey: " + new String(result.getRow()));
                 dataList.add(new String(result.value()));
             }
             return dataList;
         }
 
+        // Return all lines of words and counts within the required time slot.
         private String getDateValidLines(String userId1, String userId2, String date1, String date2) throws IOException {
             ArrayList<String> dataLines = readData(userId1, userId2);
             StringBuilder builder = new StringBuilder();
@@ -125,14 +125,13 @@ public class HbaseQuery3DAO {
                     if (date.compareTo(date1) >= 0 && date.compareTo(date2) <= 0) {
                         // append word:count text of valid date to string builder.
                         builder.append(dateLine.split(",")[1] + ";");
-//                        System.out.println(dateLine);
                     }
                 }
             }
             return builder.toString();
         }
 
-
+        // Return the map of required words as key, count as value.
         private HashMap<String, Integer> getWordCountMap(String[] wordCountList, String word1, String word2, String word3) {
             HashMap<String, Integer> wordCountMap = new HashMap<>();
             wordCountMap.put(word1, 0);
@@ -147,7 +146,6 @@ public class HbaseQuery3DAO {
 
                     if (word.equals(word1) || word.equals(word2) || word.equals(word3)) {
                         wordCountMap.put(word, wordCountMap.get(word) + count);
-//                        System.out.println(String.format("word:%s\tcount:%d\ttotalCount:%d", word, count, wordCountMap.get(word)));
                     }
                 }
             }

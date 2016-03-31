@@ -24,8 +24,6 @@ public class Q2Servlet extends HttpServlet {
         response.setContentType("text/plain;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
-//        new HbaseQuery2DAO();
-
         if (key == null || message == null) {
             writer.write(formatOutput());
             writer.close();
